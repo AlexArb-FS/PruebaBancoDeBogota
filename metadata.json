@@ -1,0 +1,5 @@
+{
+  "name": "Banco V5",
+  "description": "A foundational project structure featuring a React frontend with TypeScript and Tailwind CSS, and a basic Node.js backend with Express. This skeleton provides a clean, scalable starting point for full-stack web application development.",
+  "requestFramePermissions": []
+}
