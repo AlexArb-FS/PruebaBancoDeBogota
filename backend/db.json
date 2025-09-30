@@ -1,0 +1,10 @@
+
+{
+  "users": [
+    {
+      "email": "test@bancobogota.com",
+      "name": "Usuario de Prueba",
+      "password": "1"
+    }
+  ]
+}
