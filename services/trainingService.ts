@@ -57,19 +57,19 @@ export const loadTrainings = async (userId: string): Promise<Training[]> => {
     const courseModules = modulesData.filter(module => module.id_curso === course.id);
 
     let completedModulesCount = 0;
-    if (userEnrolledCourses.has(course.id)) { // Solo cuenta progreso si está inscrito
-      courseModules.forEach(module => {
-        if (userCompletedModules.has(module.id)) {
-          completedModulesCount++;
-        }
-      });
+if (userEnrolledCourses.has(course.id)) { // Solo cuenta progreso si está inscrito
+  courseModules.forEach(module => {
+    if (userCompletedModules.has(module.id)) {
+      completedModulesCount++;
     }
+  });
+}
 
-    const totalModules = courseModules.length;
-    const progressPercent = totalModules > 0 ? (completedModulesCount / totalModules) * 100 : 0;
+const totalModules = courseModules.length;
+const progressPercent = totalModules > 0 ? (completedModulesCount / totalModules) * 100 : 0;
 
-    // Determinar si el curso está "inscrito" basado en si hay alguna entrada en user_course_progress
-    const enrollmentId = userEnrolledCourses.has(course.id) ? course.id : undefined;
+// Determinar si el curso está "inscrito" basado en si hay alguna entrada en user_course_progress
+const enrollmentId = userEnrolledCourses.has(course.id) ? course.id : undefined;
 
     // Mapear los módulos para el detalle de la capacitación
     const mappedModules: Module[] = courseModules.map(m => ({
@@ -171,6 +171,8 @@ export const enrollInCourse = async (userId: string, courseId: string) => {
 
 // Renombrado de updateConceptProgress a updateModuleProgress
 export const updateModuleProgress = async (userId: string, courseId: string, moduleId: string, completed: boolean) => {
+  console.log(`[updateModuleProgress] User: ${userId}, Course: ${courseId}, Module: ${moduleId}, Completed: ${completed}`); // DEBUG
+
   // 1. Actualizar el estado del módulo específico
   const { error: updateModuleError } = await supabase.from('user_module_progress')
     .update({ completed: completed })
@@ -178,11 +180,10 @@ export const updateModuleProgress = async (userId: string, courseId: string, mod
     .eq('module_id', moduleId);
 
   if (updateModuleError) {
-    console.error('Error updating module progress:', updateModuleError);
+    console.error('[updateModuleProgress] Error updating module progress in DB:', updateModuleError); // DEBUG
     throw updateModuleError;
   }
-
-  console.log(`Module ${moduleId} progress updated to ${completed} for user ${userId}.`);
+  console.log(`[updateModuleProgress] Module ${moduleId} progress updated in DB.`); // DEBUG
 
   // 2. Verificar el progreso general del curso para actualizar user_course_progress
   const { data: courseModules, error: courseModulesError } = await supabase
@@ -191,19 +192,18 @@ export const updateModuleProgress = async (userId: string, courseId: string, mod
     .eq('id_curso', courseId);
 
   if (courseModulesError) {
-    console.error('Error fetching course modules for progress check:', courseModulesError);
+    console.error('[updateModuleProgress] Error fetching course modules for progress check:', courseModulesError); // DEBUG
     throw courseModulesError;
   }
 
   const totalModulesInCourse = courseModules?.length || 0;
+  console.log(`[updateModuleProgress] Total modules in course ${courseId}: ${totalModulesInCourse}`); // DEBUG
 
   if (totalModulesInCourse === 0) {
-    // Si no hay módulos en el curso, el curso no puede ser completado por módulos.
-    console.warn(`Course ${courseId} has no modules. Cannot determine course completion based on modules.`);
+    console.warn(`[updateModuleProgress] Course ${courseId} has no modules. Cannot determine course completion based on modules.`); // DEBUG
     return;
   }
 
-  // Obtener el progreso de todos los módulos del curso para el usuario
   const { data: userProgressForCourse, error: userProgressForCourseError } = await supabase
     .from('user_module_progress')
     .select('module_id, completed')
@@ -211,13 +211,14 @@ export const updateModuleProgress = async (userId: string, courseId: string, mod
     .in('module_id', courseModules.map(m => m.id));
 
   if (userProgressForCourseError) {
-    console.error('Error fetching user progress for course modules:', userProgressForCourseError);
+    console.error('[updateModuleProgress] Error fetching user progress for course modules:', userProgressForCourseError); // DEBUG
     throw userProgressForCourseError;
   }
+  console.log(`[updateModuleProgress] User progress for course ${courseId}:`, userProgressForCourse); // DEBUG
 
   const completedModulesInCourse = userProgressForCourse?.filter(p => p.completed).length || 0;
-
   const isCourseCompleted = (completedModulesInCourse === totalModulesInCourse) && (totalModulesInCourse > 0);
+  console.log(`[updateModuleProgress] Completed modules in course: ${completedModulesInCourse}, Is course completed: ${isCourseCompleted}`); // DEBUG
 
   // 3. Actualizar el estado de finalización del curso en user_course_progress
   const { error: updateCourseProgressError } = await supabase.from('user_course_progress')
@@ -226,8 +227,8 @@ export const updateModuleProgress = async (userId: string, courseId: string, mod
     .eq('course_id', courseId);
 
   if (updateCourseProgressError) {
-    console.error('Error updating course progress status:', updateCourseProgressError);
+    console.error('[updateModuleProgress] Error updating course progress status in DB:', updateCourseProgressError); // DEBUG
     throw updateCourseProgressError;
   }
-  console.log(`Course ${courseId} completion status updated to ${isCourseCompleted} for user ${userId}.`);
+  console.log(`[updateModuleProgress] Course ${courseId} completion status updated to ${isCourseCompleted} in DB.`); // DEBUG
 };

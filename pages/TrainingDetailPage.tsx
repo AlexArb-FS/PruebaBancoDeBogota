@@ -1,30 +1,35 @@
 import React from 'react';
-import { Training } from '../types'; // Eliminado Concept de la importación, ahora se manejan en Training
-import { updateModuleProgress } from '../services/trainingService'; // Renombrado a updateModuleProgress
+import { Training } from '../types';
+import { updateModuleProgress } from '../services/trainingService';
 import { useAuth } from '../contexts/AuthContext';
 
 interface TrainingDetailPageProps {
   training: Training;
   onBack: () => void;
-  onUpdateTraining: (updatedTrainingId: string) => void; // Cambiado para recibir solo el ID
+  onUpdateTraining: (updatedTrainingId: string) => void;
 }
 
 const TrainingDetailPage: React.FC<TrainingDetailPageProps> = ({ training, onBack, onUpdateTraining }) => {
   const { user } = useAuth();
+  console.log('TrainingDetailPage: Current User:', user); // DEBUG
+  console.log('TrainingDetailPage: Current Training:', training); // DEBUG
 
-  // Cambiado de handleConceptToggle a handleModuleToggle
   const handleModuleToggle = async (moduleId: string, completed: boolean) => {
-    if (!user || !training.id) return;
+    console.log(`handleModuleToggle: Toggling module ${moduleId} to ${completed}`); // DEBUG
+    if (!user || !training.id) {
+      console.warn('handleModuleToggle: User not available or training ID missing. Cannot update module progress.'); // DEBUG
+      return;
+    }
 
     try {
       await updateModuleProgress(user.id, training.id, moduleId, completed);
-      // Una vez que se actualiza el módulo, notificamos a HomePage para que recargue el entrenamiento completo
+      console.log('handleModuleToggle: updateModuleProgress successful, calling onUpdateTraining.'); // DEBUG
       onUpdateTraining(training.id);
     } catch (err) {
-      console.error('Error updating module progress:', err);
+      console.error('handleModuleToggle: Error updating module progress:', err); // DEBUG
     }
   };
-
+  
   const isEnrolled = training.enrollmentId !== undefined; // Verifica si está inscrito
 
   return (
@@ -67,11 +72,11 @@ const TrainingDetailPage: React.FC<TrainingDetailPageProps> = ({ training, onBac
               <div key={module.id} className="bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex items-start space-x-4">
                 <input
                   type="checkbox"
-                  id={`module-${module.id}`} // ID único para el checkbox
-                  className="mt-1 h-5 w-5 rounded border-gray-300 text-[#0043A9] focus:ring-[#003687] cursor-pointer"
-                  checked={training.completedModuleIds?.includes(module.id) || false} // Usar completedModuleIds
-                  onChange={(e) => handleModuleToggle(module.id, e.target.checked)} // Usar handleModuleToggle
-                  disabled={!isEnrolled} // Deshabilitar si no está inscrito
+                  id={`module-${module.id}`}
+                  className="..."
+                  checked={training.completedModuleIds?.includes(module.id) || false} // ESTO ES CLAVE
+                  onChange={(e) => handleModuleToggle(module.id, e.target.checked)} // ESTO ES CLAVE
+                  disabled={!isEnrolled}
                 />
                 <label htmlFor={`module-${module.id}`} className="flex-1 cursor-pointer">
                   <h3 className="font-semibold text-gray-800">{module.title}</h3>

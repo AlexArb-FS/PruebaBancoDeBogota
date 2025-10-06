@@ -11,7 +11,7 @@ const navItems = [
   { id: 'dashboard', name: 'Inicio', icon: HomeIcon },
   { id: 'courses', name: 'Cursos', icon: AcademicCapIcon },
   { id: 'profile', name: 'Mi Perfil', icon: ProfileIcon },
-  { id: 'settings', name: 'Configuración', icon: SettingsIcon },
+  // { id: 'settings', name: 'Configuración', icon: SettingsIcon },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, activePage, onNavigate }) => {

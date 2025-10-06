@@ -73,11 +73,10 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleUpdateTraining = async (updatedTrainingId: string) => { // Cambiado para recibir solo el ID
+  const handleUpdateTraining = async (updatedTrainingId: string) => {
     if (!user) return;
     try {
-      // Recargar todas las capacitaciones para obtener la información más reciente
-      await fetchTrainings();
+      await fetchTrainings(); // Recargar todos los entrenamientos para obtener la información más reciente
 
       // Si el entrenamiento seleccionado es el que se actualizó, actualízalo en el estado
       if (selectedTraining && selectedTraining.id === updatedTrainingId) {
