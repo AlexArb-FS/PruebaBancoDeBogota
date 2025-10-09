@@ -1,4 +1,3 @@
-// CoursesPage.tsx (modificado)
 import React from 'react';
 import Card from '../components/TrainingCard';
 import { Training } from '../types';
@@ -16,7 +15,6 @@ const CoursesPage: React.FC<CoursesPageProps> = ({ trainings, onSelectTraining, 
   // Los cursos completados son aquellos con progreso del 100%
   const completedCourses = trainings.filter(t => t.progress === 100);
 
-  // Card variant for available courses (view and enroll actions)
   const renderAvailableCourseCard = (training: Training) => (
     <Card
       key={training.id}
@@ -47,7 +45,6 @@ const CoursesPage: React.FC<CoursesPageProps> = ({ trainings, onSelectTraining, 
     </Card>
   );
 
-  // Card variant for completed courses (with progress bar, eye icon)
   const renderCompletedCourseCard = (training: Training) => (
     <Card
       key={training.id}

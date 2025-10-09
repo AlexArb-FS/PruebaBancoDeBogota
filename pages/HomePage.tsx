@@ -1,5 +1,5 @@
-// HomePage.tsx (modificado)
-import React, { useState, useEffect, useCallback } from 'react'; // Agregado useCallback
+import React, { useState, useEffect, useCallback } from 'react'; 
+
 import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
 import DashboardPage from './DashboardPage';
@@ -21,10 +21,10 @@ const HomePage: React.FC = () => {
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Función para cargar/recargar capacitaciones
+  // Función para recargar capacitaciones
   const fetchTrainings = useCallback(async () => {
     if (!user) {
-      setIsLoading(false); // No hay usuario, no hay capacitaciones que cargar
+      setIsLoading(false);
       return;
     }
     setIsLoading(true);
@@ -33,15 +33,14 @@ const HomePage: React.FC = () => {
       setTrainings(loadedTrainings);
     } catch (err) {
       console.error('Error loading trainings:', err);
-      // Podrías añadir un estado para mostrar el error al usuario
     } finally {
       setIsLoading(false);
     }
-  }, [user]); // Dependencia del usuario para recargar si cambia
+  }, [user]);
 
   useEffect(() => {
     fetchTrainings();
-  }, [fetchTrainings]); // Ejecutar al montar o cuando fetchTrainings cambie
+  }, [fetchTrainings]); 
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
@@ -65,11 +64,10 @@ const HomePage: React.FC = () => {
     console.log('Enrolling user:', user.id, 'in course:', trainingToEnroll.id);
     try {
       await enrollInCourse(user.id, trainingToEnroll.id);
-      await fetchTrainings(); // Recargar todos los entrenamientos para reflejar la inscripción
-      setActivePage('dashboard'); // O a 'courses' si prefieres que siga viendo el catálogo
+      await fetchTrainings(); 
+      setActivePage('dashboard'); 
     } catch (err) {
       console.error('Error enrolling:', err);
-      // Manejo de errores para el usuario
     }
   };
 
@@ -78,7 +76,6 @@ const HomePage: React.FC = () => {
     try {
       await fetchTrainings(); // Recargar todos los entrenamientos para obtener la información más reciente
 
-      // Si el entrenamiento seleccionado es el que se actualizó, actualízalo en el estado
       if (selectedTraining && selectedTraining.id === updatedTrainingId) {
         const newSelectedTraining = trainings.find(t => t.id === updatedTrainingId) || null;
         setSelectedTraining(newSelectedTraining);

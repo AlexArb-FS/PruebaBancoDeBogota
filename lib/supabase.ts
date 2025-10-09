@@ -1,27 +1,23 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Define la estructura de la base de datos para que coincida con tus tablas de Supabase.
 export interface Database {
   public: {
     Tables: {
-      users: { // Si usas una tabla 'users' personalizada
+      users: { 
         Row: {
           id: string // UUID de auth.users
           name: string
           email: string
-          // password: string // Las contraseñas no deberían estar aquí, Supabase Auth las maneja
         }
         Insert: {
           id?: string
           name: string
           email: string
-          // password: string
         }
         Update: {
           id?: string
           name?: string
           email?: string
-          // password?: string
         }
         Relationships: []
       },
@@ -100,8 +96,8 @@ export interface Database {
             foreignKeyName: "user_module_progress_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: false;
-            referencedRelation: "users"; // Si 'users' es tu tabla de perfiles. Si usas auth.users directamente, esto es más complejo de tipar aquí.
-            referencedColumns: ["id"]; // Asumiendo que 'users' tiene un 'id' que coincide con auth.users.id
+            referencedRelation: "users";
+            referencedColumns: ["id"];
           },
         ];
       };
@@ -133,8 +129,8 @@ export interface Database {
             foreignKeyName: "user_course_progress_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: false;
-            referencedRelation: "users"; // Si 'users' es tu tabla de perfiles. Si usas auth.users directamente, esto es más complejo de tipar aquí.
-            referencedColumns: ["id"]; // Asumiendo que 'users' tiene un 'id' que coincide con auth.users.id
+            referencedRelation: "users";
+            referencedColumns: ["id"];
           },
         ];
       };

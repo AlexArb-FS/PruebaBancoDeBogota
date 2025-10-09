@@ -30,7 +30,7 @@ const TrainingDetailPage: React.FC<TrainingDetailPageProps> = ({ training, onBac
     }
   };
   
-  const isEnrolled = training.enrollmentId !== undefined; // Verifica si está inscrito
+  const isEnrolled = training.enrollmentId !== undefined;
 
   return (
     <div>
@@ -52,7 +52,7 @@ const TrainingDetailPage: React.FC<TrainingDetailPageProps> = ({ training, onBac
              <div className="mt-6">
                 <div className="flex justify-between items-center mb-1">
                 <span className="text-sm font-medium text-gray-600">Progreso General</span>
-                <span className="text-sm font-bold text-[#0043A9]">{Math.round(training.progress)}%</span> {/* Redondear el progreso */}
+                <span className="text-sm font-bold text-[#0043A9]">{Math.round(training.progress)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2.5" role="progressbar" aria-valuenow={training.progress} aria-valuemin={0} aria-valuemax={100} aria-label={`Progreso de ${training.title}`}>
                 <div
@@ -67,15 +67,15 @@ const TrainingDetailPage: React.FC<TrainingDetailPageProps> = ({ training, onBac
       <div className="mt-8">
         <h2 className="text-xl md:text-2xl font-semibold text-gray-700 mb-4">Módulos del Curso</h2> {/* Cambiado de Conceptos a Módulos */}
         <div className="space-y-4">
-          {training.modules && training.modules.length > 0 ? ( // Cambiado de concepts a modules
+          {training.modules && training.modules.length > 0 ? (
             training.modules.map(module => ( // Mapear módulos
               <div key={module.id} className="bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex items-start space-x-4">
                 <input
                   type="checkbox"
                   id={`module-${module.id}`}
                   className="..."
-                  checked={training.completedModuleIds?.includes(module.id) || false} // ESTO ES CLAVE
-                  onChange={(e) => handleModuleToggle(module.id, e.target.checked)} // ESTO ES CLAVE
+                  checked={training.completedModuleIds?.includes(module.id) || false} // El check
+                  onChange={(e) => handleModuleToggle(module.id, e.target.checked)} // Toggle del check
                   disabled={!isEnrolled}
                 />
                 <label htmlFor={`module-${module.id}`} className="flex-1 cursor-pointer">
@@ -88,7 +88,7 @@ const TrainingDetailPage: React.FC<TrainingDetailPageProps> = ({ training, onBac
             <p className="text-gray-500">No hay módulos definidos para este curso.</p>
           )}
         </div>
-        {!isEnrolled && ( // Mensaje si no está inscrito
+        {!isEnrolled && ( // Si no está inscrito a ningun curso
             <div className="mt-6 p-4 text-center bg-blue-50 text-blue-700 border border-blue-200 rounded-lg">
                 Inscríbete en este curso desde la página de 'Cursos' para poder marcar tu progreso.
             </div>

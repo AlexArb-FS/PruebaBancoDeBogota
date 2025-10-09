@@ -9,11 +9,7 @@ interface DashboardPageProps {
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({ trainings, onSelectTraining }) => {
-  // Entrenamientos en progreso: Inscritos (enrollmentId existe) y no completados (progreso entre 0 y 100)
-  // MODIFICACIÓN AQUÍ: Incluir cursos con progreso del 0% si están inscritos
   const inProgressTrainings = trainings.filter(t => t.enrollmentId !== undefined && t.progress < 100);
-  // Eliminado `t.progress > 0` para incluir cursos recién inscritos con 0% de progreso.
-  // La condición `t.progress < 100` ya excluye los cursos completados.
 
   return (
     <>

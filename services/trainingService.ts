@@ -1,6 +1,5 @@
-// trainingService.ts (corregido y actualizado para nueva DB)
 import { createClient } from '@supabase/supabase-js';
-import { Training, Module } from '../types'; // Importar Module
+import { Training, Module } from '../types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -8,7 +7,6 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const loadTrainings = async (userId: string): Promise<Training[]> => {
-  // 1. Obtener todos los cursos
   const { data: coursesData, error: coursesError } = await supabase
     .from('courses')
     .select('id, titulo, descripcion');
@@ -17,7 +15,6 @@ export const loadTrainings = async (userId: string): Promise<Training[]> => {
     throw coursesError;
   }
 
-  // 2. Obtener todos los módulos
   const { data: modulesData, error: modulesError } = await supabase
     .from('modules')
     .select('id, id_curso, titulo, descripcion');
@@ -26,7 +23,6 @@ export const loadTrainings = async (userId: string): Promise<Training[]> => {
     throw modulesError;
   }
 
-  // 3. Obtener el progreso del usuario para todos los módulos
   const { data: userModuleProgressData, error: userModuleProgressError } = await supabase
     .from('user_module_progress')
     .select('module_id, completed')
@@ -39,7 +35,6 @@ export const loadTrainings = async (userId: string): Promise<Training[]> => {
     userModuleProgressData?.filter(p => p.completed).map(p => p.module_id)
   );
 
-  // 4. Obtener el progreso del usuario para todos los cursos (solo para saber si está inscrito)
   const { data: userCourseProgressData, error: userCourseProgressError } = await supabase
     .from('user_course_progress')
     .select('course_id, completed')
@@ -52,7 +47,6 @@ export const loadTrainings = async (userId: string): Promise<Training[]> => {
   const userCompletedCourseStatus = new Map(userCourseProgressData?.map(p => [p.course_id, p.completed]));
 
 
-  // Mapear cursos a Trainings, calculando progreso y adjuntando módulos
   const trainings: Training[] = coursesData.map(course => {
     const courseModules = modulesData.filter(module => module.id_curso === course.id);
 
@@ -68,7 +62,6 @@ if (userEnrolledCourses.has(course.id)) { // Solo cuenta progreso si está inscr
 const totalModules = courseModules.length;
 const progressPercent = totalModules > 0 ? (completedModulesCount / totalModules) * 100 : 0;
 
-// Determinar si el curso está "inscrito" basado en si hay alguna entrada en user_course_progress
 const enrollmentId = userEnrolledCourses.has(course.id) ? course.id : undefined;
 
     // Mapear los módulos para el detalle de la capacitación
@@ -83,9 +76,8 @@ const enrollmentId = userEnrolledCourses.has(course.id) ? course.id : undefined;
       title: course.titulo,
       description: course.descripcion,
       progress: progressPercent,
-      modules: mappedModules, // Asignar los módulos al training
+      modules: mappedModules,
       enrollmentId: enrollmentId,
-      // completedModuleIds solo si está inscrito
       completedModuleIds: enrollmentId ? mappedModules.filter(m => userCompletedModules.has(m.id)).map(m => m.id) : [],
     };
   });
@@ -122,7 +114,6 @@ export const enrollInCourse = async (userId: string, courseId: string) => {
     return; // No hacer nada si ya está inscrito
   }
 
-  // 1. Insertar entrada en user_course_progress para marcar la inscripción
   const { error: insertCourseProgressError } = await supabase
     .from('user_course_progress')
     .insert({ user_id: userId, course_id: courseId, completed: false });
@@ -133,11 +124,10 @@ export const enrollInCourse = async (userId: string, courseId: string) => {
   console.log(`User ${userId} enrolled in course ${courseId}.`);
 
 
-  // 2. Obtener todos los módulos del curso
   const { data: modules, error: modulesError } = await supabase
     .from('modules')
     .select('id')
-    .eq('id_curso', courseId); // Usar id_curso
+    .eq('id_curso', courseId);
 
   if (modulesError) {
     console.error('Error querying modules for enrollment:', modulesError);
@@ -146,10 +136,9 @@ export const enrollInCourse = async (userId: string, courseId: string) => {
 
   if (!modules || modules.length === 0) {
     console.warn(`No modules found for course ${courseId}, no module progress entries created.`);
-    return; // Si no hay módulos, no hay progreso a insertar
+    return;
   }
 
-  // 3. Crear entradas de progreso para cada módulo
   const moduleProgressEntries = modules.map(module => ({
     user_id: userId,
     module_id: module.id,
@@ -169,11 +158,9 @@ export const enrollInCourse = async (userId: string, courseId: string) => {
   console.log(`Initial module progress entries created for course ${courseId} and user ${userId}.`);
 };
 
-// Renombrado de updateConceptProgress a updateModuleProgress
 export const updateModuleProgress = async (userId: string, courseId: string, moduleId: string, completed: boolean) => {
   console.log(`[updateModuleProgress] User: ${userId}, Course: ${courseId}, Module: ${moduleId}, Completed: ${completed}`); // DEBUG
 
-  // 1. Actualizar el estado del módulo específico
   const { error: updateModuleError } = await supabase.from('user_module_progress')
     .update({ completed: completed })
     .eq('user_id', userId)
@@ -185,7 +172,6 @@ export const updateModuleProgress = async (userId: string, courseId: string, mod
   }
   console.log(`[updateModuleProgress] Module ${moduleId} progress updated in DB.`); // DEBUG
 
-  // 2. Verificar el progreso general del curso para actualizar user_course_progress
   const { data: courseModules, error: courseModulesError } = await supabase
     .from('modules')
     .select('id')
@@ -220,7 +206,6 @@ export const updateModuleProgress = async (userId: string, courseId: string, mod
   const isCourseCompleted = (completedModulesInCourse === totalModulesInCourse) && (totalModulesInCourse > 0);
   console.log(`[updateModuleProgress] Completed modules in course: ${completedModulesInCourse}, Is course completed: ${isCourseCompleted}`); // DEBUG
 
-  // 3. Actualizar el estado de finalización del curso en user_course_progress
   const { error: updateCourseProgressError } = await supabase.from('user_course_progress')
     .update({ completed: isCourseCompleted })
     .eq('user_id', userId)

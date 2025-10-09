@@ -1,11 +1,10 @@
-// index.ts (modificado)
 export interface UserCredentials {
   email: string;
   password: string;
 }
 
 export interface User {
-  id: string; // Cambiado a string (UUID de Supabase Auth)
+  id: string; // UUID
   name: string;
   email: string;
 }
@@ -15,7 +14,6 @@ export interface UpdatePasswordCredentials {
   newPassword: string;
 }
 
-// Renombrada de Concept a Module para mayor claridad
 export interface Module {
   id: string;
   title: string;
@@ -27,7 +25,7 @@ export interface Training {
   title: string;
   description: string;
   progress: number;
-  modules?: Module[]; // Cambiado de 'concepts' a 'modules'
-  enrollmentId?: string; // UUID - indica que el usuario está inscrito
-  completedModuleIds?: string[]; // Cambiado de 'completedConceptIds' a 'completedModuleIds'
+  modules?: Module[];
+  enrollmentId?: string;
+  completedModuleIds?: string[];
 }
